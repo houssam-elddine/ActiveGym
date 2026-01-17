@@ -12,6 +12,21 @@ class ApiService {
     );
   }
 
+  static Future<http.Response> put(String endpoint, Map data) {
+    return http.put(
+      Uri.parse("${Config.baseUrl}$endpoint"),
+      headers: _headers(),
+      body: jsonEncode(data),
+    );
+  }
+
+  static Future<http.Response> delete(String endpoint) {
+    return http.delete(
+      Uri.parse("${Config.baseUrl}$endpoint"),
+      headers: _headers(),
+    );
+  }
+
   static Future<http.Response> post(String endpoint, Map data) {
     return http.post(
       Uri.parse("${Config.baseUrl}$endpoint"),
