@@ -51,6 +51,12 @@ class _DisciplineScreenState extends State<DisciplineScreen> {
         itemBuilder: (_, i) {
           final d = disciplines[i];
           return ListTile(
+            leading: d['img'] != null
+                ? Image.network(
+                    'http://10.0.2.2:8000/storage/' + d['img'],
+                    width: 40,
+                  )
+                : null,
             title: Text(d['nom']),
             subtitle: Text("${d['prix']} DA"),
             trailing: Row(

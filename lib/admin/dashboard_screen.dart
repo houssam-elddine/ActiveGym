@@ -1,3 +1,6 @@
+import 'package:ActiveGym/admin/abonnements/abonnement_screen.dart';
+import 'package:ActiveGym/admin/coaches/coach_screen.dart';
+import 'package:ActiveGym/admin/reservations/reservation_admin_screen.dart';
 import 'package:flutter/material.dart';
 import 'disciplines/discipline_screen.dart';
 
@@ -12,9 +15,9 @@ class DashboardScreen extends StatelessWidget {
         children: [
           _item(context, "Disciplines", Icons.fitness_center,
               DisciplineScreen()),
-          _item(context, "Coachs", Icons.people, Placeholder()),
-          _item(context, "Abonnements", Icons.card_membership, Placeholder()),
-          _item(context, "Réservations", Icons.event, Placeholder()),
+          _item(context, "Coachs", Icons.people, CoachScreen()),
+          _item(context, "Abonnements", Icons.card_membership, AbonnementScreen()),
+          _item(context, "Réservations", Icons.event, ReservationAdminScreen()),
         ],
       ),
     );

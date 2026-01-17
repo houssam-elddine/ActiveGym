@@ -1,4 +1,6 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../core/api_service.dart';
 
 class DisciplineForm extends StatefulWidget {
@@ -12,6 +14,7 @@ class DisciplineForm extends StatefulWidget {
 class _DisciplineFormState extends State<DisciplineForm> {
   final nom = TextEditingController();
   final prix = TextEditingController();
+  File? image;
 
   @override
   void initState() {
@@ -22,18 +25,29 @@ class _DisciplineFormState extends State<DisciplineForm> {
     }
   }
 
+  pickImage() async {
+    final picked = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+    );
+    if (picked != null) {
+      setState(() => image = File(picked.path));
+    }
+  }
+
   save() async {
     final data = {
       "nom": nom.text,
-      "prix": double.parse(prix.text),
+      "prix": prix.text,
     };
 
     if (widget.discipline == null) {
-      await ApiService.post('/disciplines', data);
+      await ApiService.multipart('/disciplines', data, image);
     } else {
-      await ApiService.put(
+      await ApiService.multipart(
         '/disciplines/${widget.discipline!['id']}',
         data,
+        image,
+        isUpdate: true,
       );
     }
     Navigator.pop(context, true);
@@ -44,13 +58,24 @@ class _DisciplineFormState extends State<DisciplineForm> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.discipline == null
-            ? "Ajouter une discipline"
+            ? "Ajouter discipline"
             : "Modifier discipline"),
       ),
       body: Padding(
         padding: EdgeInsets.all(20),
         child: Column(
           children: [
+            GestureDetector(
+              onTap: pickImage,
+              child: CircleAvatar(
+                radius: 45,
+                backgroundImage:
+                    image != null ? FileImage(image!) : null,
+                child: image == null
+                    ? Icon(Icons.camera_alt)
+                    : null,
+              ),
+            ),
             TextField(
               controller: nom,
               decoration: InputDecoration(labelText: "Nom"),
