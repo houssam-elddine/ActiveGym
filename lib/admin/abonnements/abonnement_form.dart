@@ -29,13 +29,25 @@ class _AbonnementFormState extends State<AbonnementForm> {
     }
   }
 
+  /// تحميل disciplines
   loadDisciplines() async {
     final res = await ApiService.get('/disciplines');
-    disciplines = jsonDecode(res.body);
+    final data = jsonDecode(res.body);
+
+    disciplines = data['disciplines']; // ✅ الحل هنا
+
     setState(() {});
   }
 
+  /// حفظ abonnement
   save() async {
+    if (disciplineId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("اختر discipline")),
+      );
+      return;
+    }
+
     final data = {
       "nom": nom.text,
       "prix": double.parse(prix.text),
@@ -58,39 +70,48 @@ class _AbonnementFormState extends State<AbonnementForm> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.abonnement == null
-            ? "Ajouter un abonnement"
-            : "Modifier l'abonnement"),
+        title: Text(
+          widget.abonnement == null
+              ? "Ajouter un abonnement"
+              : "Modifier l'abonnement",
+        ),
       ),
       body: Padding(
-        padding: EdgeInsets.all(20),
+        padding: const EdgeInsets.all(20),
         child: Column(
           children: [
             TextField(
               controller: nom,
               decoration: InputDecoration(labelText: "Nom"),
             ),
+            SizedBox(height: 10),
             TextField(
               controller: prix,
               decoration: InputDecoration(labelText: "Prix"),
               keyboardType: TextInputType.number,
             ),
             SizedBox(height: 15),
+
+            /// Dropdown disciplines
             DropdownButtonFormField<int>(
               value: disciplineId,
               hint: Text("Choisir une discipline"),
               items: disciplines.map<DropdownMenuItem<int>>((d) {
-                return DropdownMenuItem(
+                return DropdownMenuItem<int>(
                   value: d['id'],
                   child: Text(d['nom']),
                 );
               }).toList(),
               onChanged: (v) => setState(() => disciplineId = v),
             ),
+
             SizedBox(height: 25),
-            ElevatedButton(
-              onPressed: save,
-              child: Text("Enregistrer"),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: save,
+                child: Text("Enregistrer"),
+              ),
             ),
           ],
         ),

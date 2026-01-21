@@ -12,8 +12,11 @@ class _AbonnementScreenState extends State<AbonnementScreen> {
   List abonnements = [];
 
   load() async {
-    final res = await ApiService.get('/abonnements');
-    abonnements = jsonDecode(res.body);
+  final res = await ApiService.get('/abonnements');
+    final data = jsonDecode(res.body);
+
+  abonnements = data['abonnements']; // ✅ هنا الحل
+
     setState(() {});
   }
 

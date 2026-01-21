@@ -9,12 +9,14 @@ class DisciplineScreen extends StatefulWidget {
 }
 
 class _DisciplineScreenState extends State<DisciplineScreen> {
-  List disciplines = [];
+  List<dynamic> disciplines = [];
 
   load() async {
     final res = await ApiService.get('/disciplines');
-    disciplines = jsonDecode(res.body);
-    setState(() {});
+    final data = jsonDecode(res.body) as Map<String, dynamic>;
+    setState(() {
+      disciplines = (data['disciplines'] ?? []) as List<dynamic>;
+    });
   }
 
   delete(id) async {
@@ -52,11 +54,29 @@ class _DisciplineScreenState extends State<DisciplineScreen> {
           final d = disciplines[i];
           return ListTile(
             leading: d['img'] != null
-                ? Image.network(
-                    'http://10.0.2.2:8000/storage/' + d['img'],
-                    width: 40,
-                  )
-                : null,
+    ? Image.network(
+        'http://10.0.2.2:8000/storage/' + d['img'],
+        width: 40,
+        fit: BoxFit.cover,
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+          return const SizedBox(
+            width: 40,
+            height: 40,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          );
+        },
+        errorBuilder: (context, error, stackTrace) {
+          print("Image load error: $error");          // ← سيطبع السبب الحقيقي في console
+          print("Stack: $stackTrace");
+          return const Icon(
+            Icons.broken_image,
+            size: 40,
+            color: Colors.red,
+          );
+        },
+      )
+    : const Icon(Icons.image_not_supported, size: 40),
             title: Text(d['nom']),
             subtitle: Text("${d['prix']} DA"),
             trailing: Row(

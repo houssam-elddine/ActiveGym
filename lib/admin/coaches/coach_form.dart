@@ -32,9 +32,13 @@ class _CoachFormState extends State<CoachForm> {
     }
   }
 
+  // ✅ التصحيح هنا
   loadDisciplines() async {
     final res = await ApiService.get('/disciplines');
-    disciplines = jsonDecode(res.body);
+    final data = jsonDecode(res.body);
+
+    disciplines = data['disciplines']; // ✅
+
     setState(() {});
   }
 
@@ -71,8 +75,9 @@ class _CoachFormState extends State<CoachForm> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title:
-            Text(widget.coach == null ? "Ajouter un coach" : "Modifier coach"),
+        title: Text(
+          widget.coach == null ? "Ajouter un coach" : "Modifier coach",
+        ),
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(20),
@@ -110,7 +115,7 @@ class _CoachFormState extends State<CoachForm> {
                     : widget.coach?['img'] != null
                         ? NetworkImage(
                             "http://10.0.2.2:8000/storage/${widget.coach!['img']}",
-                          ) as ImageProvider
+                          )
                         : null,
                 child: image == null && widget.coach?['img'] == null
                     ? Icon(Icons.camera_alt)

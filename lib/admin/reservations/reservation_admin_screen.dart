@@ -13,11 +13,14 @@ class _ReservationAdminScreenState extends State<ReservationAdminScreen> {
 
   load() async {
     final res = await ApiService.get('/reservations');
-    reservations = jsonDecode(res.body);
+    final data = jsonDecode(res.body);
+
+    reservations = data['reservations']; // ✅ الحل هنا
+
     setState(() {});
   }
 
-  updateStatus(id, status) async {
+  updateStatus(int id, String status) async {
     await ApiService.put('/reservations/$id/status', {
       "status": status,
     });
@@ -42,14 +45,19 @@ class _ReservationAdminScreenState extends State<ReservationAdminScreen> {
             child: ListTile(
               title: Text(r['client']['name']),
               subtitle: Text(
-                  "Abonnement: ${r['abonnement']['nom']} | ${r['status']}"),
+                "Abonnement: ${r['abonnement']['nom']} | ${r['status']}",
+              ),
               trailing: PopupMenuButton<String>(
                 onSelected: (v) => updateStatus(r['id'], v),
-                itemBuilder: (_) => [
+                itemBuilder: (_) => const [
                   PopupMenuItem(
-                      value: "confirmer", child: Text("Confirmer")),
+                    value: "confirmer",
+                    child: Text("Confirmer"),
+                  ),
                   PopupMenuItem(
-                      value: "annuler", child: Text("Annuler")),
+                    value: "annuler",
+                    child: Text("Annuler"),
+                  ),
                 ],
               ),
             ),

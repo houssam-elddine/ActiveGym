@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'auth_service.dart';
 import '../admin/dashboard_screen.dart';
+import '../client/client_home_screen.dart';
+import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
-  _LoginScreenState createState() => _LoginScreenState();
+  State<LoginScreen> createState() => _LoginScreenState();
 }
 
 class _LoginScreenState extends State<LoginScreen> {
@@ -15,46 +17,83 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Connexion Administrateur")),
+      appBar: AppBar(title: Text("Connexion")),
       body: Padding(
-        padding: EdgeInsets.all(20),
+        padding: const EdgeInsets.all(20),
         child: Column(
           children: [
             TextField(
               controller: email,
-              decoration: InputDecoration(labelText: "Email"),
+              decoration: InputDecoration(
+                labelText: "Email",
+                border: OutlineInputBorder(),
+              ),
             ),
+            SizedBox(height: 15),
             TextField(
               controller: password,
-              decoration: InputDecoration(labelText: "Mot de passe"),
               obscureText: true,
+              decoration: InputDecoration(
+                labelText: "Mot de passe",
+                border: OutlineInputBorder(),
+              ),
             ),
             SizedBox(height: 20),
+
             loading
                 ? CircularProgressIndicator()
-                : ElevatedButton(
-                    child: Text("Se connecter"),
-                    onPressed: () async {
-                      setState(() => loading = true);
-                      final success = await AuthService.login(
-                        email.text,
-                        password.text,
-                      );
-                      setState(() => loading = false);
+                : SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      child: Text("Se connecter"),
+                      onPressed: () async {
+                        setState(() => loading = true);
 
-                      if (success) {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                              builder: (_) => DashboardScreen()),
+                        final role = await AuthService.login(
+                          email.text,
+                          password.text,
                         );
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text("Accès refusé")),
-                        );
-                      }
-                    },
+
+                        setState(() => loading = false);
+
+                        if (role == 'admin') {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => DashboardScreen(),
+                            ),
+                          );
+                        } else if (role == 'client') {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => ClientHomeScreen(),
+                            ),
+                          );
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text("Email ou mot de passe incorrect"),
+                            ),
+                          );
+                        }
+                      },
+                    ),
                   ),
+
+            SizedBox(height: 15),
+
+            TextButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => RegisterClientScreen(),
+                  ),
+                );
+              },
+              child: Text("Créer un compte client"),
+            ),
           ],
         ),
       ),
