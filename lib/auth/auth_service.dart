@@ -19,7 +19,7 @@ class AuthService {
       await prefs.setString('token', token);
       await prefs.setString('role', data['user']['role']);
 
-      return data['user']['role']; // admin أو client
+      return data['user']['role']; 
     }
     return null;
   }

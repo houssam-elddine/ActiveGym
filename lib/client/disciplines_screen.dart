@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import '../core/api_service.dart';
 import 'abonnements_screen.dart';
-import 'coaches_screen.dart';
 import '../widgets/discipline_card.dart';
 
 class DisciplinesScreen extends StatefulWidget {
@@ -35,13 +34,14 @@ class _DisciplinesScreenState extends State<DisciplinesScreen> {
         });
       } else {
         setState(() {
-          errorMessage = 'فشل جلب الاختصاصات (${res.statusCode})';
+          errorMessage =
+              'Échec de récupération des disciplines (${res.statusCode})';
           loading = false;
         });
       }
     } catch (e) {
       setState(() {
-        errorMessage = 'حدث خطأ: $e';
+        errorMessage = 'Une erreur est survenue: $e';
         loading = false;
       });
     }
@@ -75,13 +75,13 @@ class _DisciplinesScreenState extends State<DisciplinesScreen> {
                       const SizedBox(height: 16),
                       ElevatedButton(
                         onPressed: load,
-                        child: const Text("إعادة المحاولة"),
+                        child: const Text("Réessayer"),
                       ),
                     ],
                   ),
                 )
               : disciplines.isEmpty
-                  ? const Center(child: Text("لا توجد اختصاصات حالياً"))
+                  ? const Center(child: Text("Aucune discipline disponible"))
                   : RefreshIndicator(
                       onRefresh: load,
                       child: ListView.builder(
@@ -91,21 +91,16 @@ class _DisciplinesScreenState extends State<DisciplinesScreen> {
                           return DisciplineCard(
                             discipline: d,
                             onTap: () {
+                              // Bouton "Réserver"
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (_) => AbonnementsScreen(discipline: d),
+                                  builder: (_) =>
+                                      AbonnementsScreen(discipline: d),
                                 ),
                               );
                             },
-                            onCoachesTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => CoachesScreen(discipline: d),
-                                ),
-                              );
-                            },
+                            onCoachesTap: null, // supprimé / optionnel
                           );
                         },
                       ),

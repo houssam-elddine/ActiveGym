@@ -6,7 +6,7 @@ import 'reservation_screen.dart';
 class AbonnementsScreen extends StatefulWidget {
   final Map discipline;
 
-  AbonnementsScreen({required this.discipline});
+  const AbonnementsScreen({super.key, required this.discipline});
 
   @override
   State<AbonnementsScreen> createState() => _AbonnementsScreenState();
@@ -17,14 +17,30 @@ class _AbonnementsScreenState extends State<AbonnementsScreen> {
   bool loading = true;
 
   Future load() async {
-    final res = await ApiService.get(
-      '/abonnements/discipline/${widget.discipline['id']}',
-    );
+    try {
+      final res = await ApiService.get(
+        '/abonnements/discipline/${widget.discipline['id']}',
+      );
 
-    if (res.statusCode == 200) {
-      abonnements = jsonDecode(res.body);
+      if (res.statusCode == 200) {
+        final Map<String, dynamic> data = jsonDecode(res.body);
+
+        setState(() {
+          abonnements = data['abonnements'] ?? [];
+          loading = false;
+        });
+      } else {
+        setState(() => loading = false);
+      }
+    } catch (e) {
+      setState(() => loading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Erreur de connexion : $e"),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
-    setState(() => loading = false);
   }
 
   @override
@@ -36,9 +52,9 @@ class _AbonnementsScreenState extends State<AbonnementsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.discipline['nom'])),
+      appBar: AppBar(title: Text(widget.discipline['nom'] ?? "")),
       body: loading
-          ? Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator())
           : ListView.builder(
               itemCount: abonnements.length,
               itemBuilder: (_, i) {
@@ -51,17 +67,21 @@ class _AbonnementsScreenState extends State<AbonnementsScreen> {
                   ),
                   child: ListTile(
                     title: Text(
-                      a['nom'],
+                      a['nom'] ?? "",
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
-                    subtitle: Text("${a['prix']} DA / mois"),
+                    subtitle: Text("${a['prix'] ?? 0} DA / mois"),
                     trailing: const Icon(Icons.arrow_forward_ios),
                     onTap: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) =>
-                              ReservationScreen(abonnement: a),
+                          builder: (_) => ReservationScreen(
+                            abonnement: {
+                              ...a, // كل بيانات abonnement
+                              'discipline': widget.discipline, // اضف discipline هنا
+                            },
+                          ),
                         ),
                       );
                     },

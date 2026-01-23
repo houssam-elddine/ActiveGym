@@ -13,11 +13,28 @@ class _MyReservationsScreenState extends State<MyReservationsScreen> {
   bool loading = true;
 
   Future load() async {
-    final res = await ApiService.get('/my-reservations');
-    if (res.statusCode == 200) {
-      reservations = jsonDecode(res.body);
+    setState(() => loading = true);
+
+    try {
+      final res = await ApiService.get('/my-reservations');
+
+      if (res.statusCode == 200) {
+        final data = jsonDecode(res.body);
+        reservations = data['reservations'] ?? [];
+      } else {
+        reservations = [];
+      }
+    } catch (e) {
+      reservations = [];
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Erreur lors du chargement : $e"),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      setState(() => loading = false);
     }
-    setState(() => loading = false);
   }
 
   @override
@@ -29,33 +46,52 @@ class _MyReservationsScreenState extends State<MyReservationsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Mes réservations")),
+      appBar: AppBar(title: const Text("Mes réservations")),
       body: loading
-          ? Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator())
           : reservations.isEmpty
-              ? Center(child: Text("Aucune réservation"))
+              ? const Center(child: Text("Aucune réservation"))
               : ListView.builder(
                   itemCount: reservations.length,
                   itemBuilder: (_, i) {
                     final r = reservations[i];
+
+                    final abonnement = r['abonnement'] ?? {};
+                    final discipline = abonnement['discipline'] ?? {};
+                    final coach = r['coach']; // ✅ أخذ المدرب من reservation مباشرة
+
                     return Card(
-                      margin:
-                          EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      margin: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 8),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(15),
                       ),
                       child: ListTile(
                         title: Text(
-                          r['abonnement']['nom'],
-                          style: TextStyle(fontWeight: FontWeight.bold),
+                          abonnement['nom'] ?? 'Abonnement inconnu',
+                          style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
-                        subtitle: Padding(
-                          padding: const EdgeInsets.only(top: 8),
-                          child: StatusBadge(status: r['status']),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const SizedBox(height: 4),
+                            Text(
+                              "Discipline: ${discipline['nom'] ?? '-'}",
+                              style: const TextStyle(fontSize: 12),
+                            ),
+                            if (coach != null)
+                              Text(
+                                "Coach: ${coach['name'] ?? '-'}",
+                                style: const TextStyle(fontSize: 12),
+                              ),
+                            const SizedBox(height: 4),
+                            StatusBadge(status: r['status']),
+                          ],
                         ),
                         trailing: r['status'] == 'en attente'
                             ? IconButton(
-                                icon: Icon(Icons.cancel, color: Colors.red),
+                                icon: const Icon(Icons.cancel,
+                                    color: Colors.red),
                                 onPressed: () async {
                                   await ApiService.put(
                                     '/reservations/${r['id']}/cancel',

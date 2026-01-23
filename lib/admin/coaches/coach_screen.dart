@@ -17,7 +17,7 @@ class _CoachScreenState extends State<CoachScreen> {
 
   // غيّر هذا إلى IP جهازك الحقيقي (مثال)
   // static const String baseUrl = 'http://192.168.1.100:8000';
-  static const String baseUrl = 'http://10.0.2.2:8000'; // احتفظ به للاختبار السريع
+  static const String baseUrl = 'https://10fd7c24c102.ngrok-free.app'; // احتفظ به للاختبار السريع
 
   Future<void> load() async {
     setState(() {

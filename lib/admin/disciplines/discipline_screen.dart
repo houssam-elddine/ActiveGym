@@ -12,12 +12,15 @@ class _DisciplineScreenState extends State<DisciplineScreen> {
   List<dynamic> disciplines = [];
 
   load() async {
-    final res = await ApiService.get('/disciplines');
-    final data = jsonDecode(res.body) as Map<String, dynamic>;
-    setState(() {
-      disciplines = (data['disciplines'] ?? []) as List<dynamic>;
-    });
-  }
+  final res = await ApiService.get('/disciplines');
+
+  final Map<String, dynamic> data = jsonDecode(res.body);
+
+  setState(() {
+    disciplines = data['disciplines'] as List<dynamic>;
+  });
+}
+
 
   delete(id) async {
     await ApiService.delete('/disciplines/$id');
@@ -55,7 +58,7 @@ class _DisciplineScreenState extends State<DisciplineScreen> {
           return ListTile(
             leading: d['img'] != null
     ? Image.network(
-        'http://10.0.2.2:8000/storage/' + d['img'],
+        'https://10fd7c24c102.ngrok-free.app/storage/' + d['img'],
         width: 40,
         fit: BoxFit.cover,
         loadingBuilder: (context, child, loadingProgress) {
